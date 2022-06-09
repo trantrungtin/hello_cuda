@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 __global__ void hello_cuda() {
-	printf("Hello Cuda\n");
+	printf("Hello Cuda x=%d, y=%d, z=%d\n", threadIdx.x, threadIdx.y, threadIdx.z);
 }
 
 int main() {

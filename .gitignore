@@ -4,3 +4,6 @@
 *.ptx
 *.cubin
 *.fatbin
+/.vs/hello_cuda
+/hello_cuda/x64/Debug
+/x64/Debug
