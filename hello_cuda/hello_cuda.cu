@@ -8,8 +8,8 @@ __global__ void hello_cuda() {
 }
 
 int main() {
-	dim3 grid(8); // number of blocks
-	dim3 block(4); // threads per block
+	dim3 grid(2, 2); // number of blocks
+	dim3 block(8, 2); // threads per block
 
 	hello_cuda << <grid, block>> > ();
 	cudaDeviceSynchronize();
