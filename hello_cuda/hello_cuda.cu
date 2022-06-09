@@ -21,6 +21,13 @@ __global__ void unique_idx_calc_threadIdx(int* input) {
 	printf("threadIdx: %d, value: %d\n", tid, input[tid]);
 }
 
+__global__ void unique_gid_calculation(int* input) {
+	int tid = threadIdx.x;
+	int offset = blockIdx.x * blockDim.x;
+	int gid = tid + offset;
+	printf("blockIdx.x=%d, threadIdx.x=%d, gid=%d, value=%d\n", blockIdx.x, threadIdx.x, gid, input[gid]);
+}
+
 void sample2() {
 	int array_size = 8;
 	int array_byte_size = sizeof(int) * array_size;
@@ -35,10 +42,11 @@ void sample2() {
 	cudaMalloc((void**)&d_data, array_byte_size);
 	cudaMemcpy(d_data, h_data, array_byte_size, cudaMemcpyHostToDevice);
 
-	dim3 block(8);
-	dim3 grid(1);
+	dim3 block(4);
+	dim3 grid(2);
 
-	unique_idx_calc_threadIdx << <grid, block >> > (d_data);
+	//unique_idx_calc_threadIdx << <grid, block >> > (d_data);
+	unique_gid_calculation << <grid, block >> > (d_data);
 }
 
 int main() {

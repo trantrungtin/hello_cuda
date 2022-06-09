@@ -45,3 +45,14 @@ int* d_data;
 cudaMalloc((void**)&d_data, array_byte_size);
 cudaMemcpy(d_data, h_data, array_byte_size, cudaMemcpyHostToDevice);
 ```
+
+Calculate the unique index
+
+<p align="center">
+    <img src="images/pic6.png" alt="Unique Indexes" width="512" height="310">
+</p>
+
+```c++
+gid = tid + offset
+grid = tid + blockIdx.x * blockDim.x
+```
