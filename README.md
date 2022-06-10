@@ -96,3 +96,26 @@ int row_offset = number_threads_in_a_row * blockIdx.y;
 int tid = threadIdx.y * blockDim.x + threadIdx.x;
 int gid = row_offset + block_offset + tid;
 ```
+
+### Calculate 3D indexes
+
+```c++
+int gid = blockDim.x * blockDim.y * threadIdx.z
+    + blockDim.x * threadIdx.y
+    + threadIdx.x
+    ;
+```
+
+### Calculate 3Dx3D indexes
+
+```c++
+int number_threads_in_a_block = blockDim.x * blockDim.y * blockDim.z;
+int number_threads_in_a_plan = number_threads_in_a_block * gridDim.x * gridDim.y;
+int gid = number_threads_in_a_plan * blockIdx.z
+    + number_threads_in_a_block * gridDim.x * blockIdx.y
+    + number_threads_in_a_block * blockIdx.x
+    + blockDim.x * blockDim.y * threadIdx.z
+    + blockDim.x * threadIdx.y
+    + threadIdx.x
+    ;
+```
