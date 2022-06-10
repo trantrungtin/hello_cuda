@@ -110,12 +110,12 @@ __global__ void unique_gid_calculation_3d(int* input) {
 	printf("tid=%d, gid=%d, value=%d\n", threadIdx.x, gid, input[gid]);
 }
 
-void createRandData(int** data, size_t size) {
-	size_t byte_size = sizeof(int) * size;
+void createRandData(int** data, size_t number_of_elements) {
+	size_t byte_size = sizeof(int) * number_of_elements;
 	(*data) = (int*)malloc(byte_size);
 	time_t t;
 	srand((unsigned)time(&t));
-	for (size_t i = 0; i < size; i++) {
+	for (size_t i = 0; i < number_of_elements; i++) {
 		(*data)[i] = (int)(rand() & 0xff);
 	}
 }
@@ -162,13 +162,79 @@ void sample6() {
 	unique_gid_calculation_3d_3d << <grid, block >> > (d_data);
 }
 
+__global__ void sum_array_gpu(int* a, int* b, int* c, int number_of_elements) {
+	int gid = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (gid < number_of_elements) {
+		c[gid] = a[gid] + b[gid];
+	}
+}
+
+void sum_array_cpu(int* a, int* b, int* c, int number_of_elements) {
+	for (int i = 0; i < number_of_elements; i++) {
+		c[i] = a[i] + b[i];
+	}
+}
+
+void compare_arrays(int* a, int* b, int number_of_elements) {
+	for (int i = 0; i < number_of_elements; i++) {
+		if (a[i] != b[i]) {
+			printf("Arrays are different.\n");
+			return;
+		}
+	}
+	printf("Arrays are same.\n");
+}
+
+void sum_two_arrays() {
+	const size_t number_of_elements = 1000;
+	const size_t number_of_bytes = number_of_elements * sizeof(int);
+	const size_t block_size = 128;
+
+	int* h_a, * h_b, * h_c, * gpu_results;
+	createRandData(&h_a, number_of_elements);
+	createRandData(&h_b, number_of_elements);
+	h_c = (int*)malloc(number_of_bytes);
+	gpu_results = (int*)malloc(number_of_bytes);
+
+	int* d_a, * d_b, * d_c;
+	createCudaData(h_a, number_of_bytes, &d_a);
+	createCudaData(h_b, number_of_bytes, &d_b);
+	cudaMalloc((void**)&d_c, number_of_bytes);
+
+	// launching the grid
+	dim3 block(block_size);
+	dim3 grid(number_of_elements / block_size + 1);
+
+	sum_array_gpu << <grid, block >> > (d_a, d_b, d_c, number_of_elements);
+	cudaDeviceSynchronize();
+
+	// memory transfer back to host
+	cudaMemcpy(gpu_results, d_c, number_of_bytes, cudaMemcpyDeviceToHost);
+
+	// array comparison
+	sum_array_cpu(h_a, h_b, h_c, number_of_elements);
+	compare_arrays(h_c, gpu_results, number_of_elements);
+
+	// cleanup data
+	cudaFree(d_a);
+	cudaFree(d_b);
+	cudaFree(d_c);
+
+	free(h_a);
+	free(h_b);
+	free(h_c);
+	free(gpu_results);
+}
+
 int main() {
 	//sample1();
 	//sample2();
 	//sample3();
 	//sample4();
 	//sample5();
-	sample6();
+	//sample6();
+	sum_two_arrays();
 
 	cudaDeviceSynchronize();
 	cudaDeviceReset();
