@@ -96,7 +96,7 @@ void perform(int* h_a, int* h_b, int* h_c, int* gpu_result, int* cpu_result, siz
 	cudaDeviceReset();
 }
 
-int main() {
+int main_sum_three_array() {
 	size_t number_of_elements = 1 << 22;
 	const size_t number_of_bytes = number_of_elements * sizeof(int);
 
