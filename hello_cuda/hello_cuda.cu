@@ -6,6 +6,15 @@
 #include <cstring>
 #include <time.h>
 
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+
+inline void gpuAssert(cudaError_t code, const char* file, int line, bool abort = true) {
+	if (code != cudaSuccess) {
+		fprintf(stderr, "GPUAssert: %s %s %d\n", cudaGetErrorString(code), file, line);
+		if (abort) exit(code);
+	}
+}
+
 __global__ void hello_cuda() {
 	printf("Hello Cuda blockIdx.x=%d, blockIdx.y=%d, blockIdx.z=%d <> threadIdx.x=%d, threadIdx.y=%d, threadIdx.z=%d\n", 
 		blockIdx.x, blockIdx.y, blockIdx.z,
@@ -35,8 +44,8 @@ void createCudaData(int* h_data, size_t size, int** d_data) {
 	if (h_data == nullptr) {
 		return;
 	}
-	cudaMalloc((void**)d_data, size);
-	cudaMemcpy(*d_data, h_data, size, cudaMemcpyHostToDevice);
+	gpuErrchk(cudaMalloc((void**)d_data, size));
+	gpuErrchk(cudaMemcpy(*d_data, h_data, size, cudaMemcpyHostToDevice));
 }
 
 void print(int* arr, size_t size) {
@@ -200,17 +209,17 @@ void sum_two_arrays() {
 	int* d_a, * d_b, * d_c;
 	createCudaData(h_a, number_of_bytes, &d_a);
 	createCudaData(h_b, number_of_bytes, &d_b);
-	cudaMalloc((void**)&d_c, number_of_bytes);
+	gpuErrchk(cudaMalloc((void**)&d_c, number_of_bytes));
 
 	// launching the grid
 	dim3 block(block_size);
 	dim3 grid(number_of_elements / block_size + 1);
 
 	sum_array_gpu << <grid, block >> > (d_a, d_b, d_c, number_of_elements);
-	cudaDeviceSynchronize();
+	gpuErrchk(cudaDeviceSynchronize());
 
 	// memory transfer back to host
-	cudaMemcpy(gpu_results, d_c, number_of_bytes, cudaMemcpyDeviceToHost);
+	gpuErrchk(cudaMemcpy(gpu_results, d_c, number_of_bytes, cudaMemcpyDeviceToHost));
 
 	// array comparison
 	sum_array_cpu(h_a, h_b, h_c, number_of_elements);
