@@ -28,19 +28,28 @@ __global__ void unique_gid_calculation(int* input) {
 	printf("blockIdx.x=%d, threadIdx.x=%d, gid=%d, value=%d\n", blockIdx.x, threadIdx.x, gid, input[gid]);
 }
 
-void sample2() {
-	int array_size = 8;
-	int array_byte_size = sizeof(int) * array_size;
-	int h_data[] = { 23, 9, 4, 53, 65, 12, 1, 33 };
+void createCudaData(int* h_data, size_t size, int** d_data) {
+	if (h_data == nullptr) {
+		return;
+	}
+	cudaMalloc((void**)d_data, size);
+	cudaMemcpy(*d_data, h_data, size, cudaMemcpyHostToDevice);
+}
 
-	for (int i = 0; i < array_size; i++) {
-		printf("%d,", h_data[i]);
+void print(int* arr, size_t size) {
+	size_t cnt = size / sizeof(int);
+	for (int i = 0; i < cnt; i++) {
+		printf("%d,", arr[i]);
 	}
 	printf("\n\n");
+}
+
+void sample2() {
+	int h_data[] = { 23, 9, 4, 53, 65, 12, 1, 33 };
+	print(h_data, sizeof(h_data));
 
 	int* d_data;
-	cudaMalloc((void**)&d_data, array_byte_size);
-	cudaMemcpy(d_data, h_data, array_byte_size, cudaMemcpyHostToDevice);
+	createCudaData(h_data, sizeof(h_data), &d_data);
 
 	dim3 block(4);
 	dim3 grid(2);
@@ -49,9 +58,29 @@ void sample2() {
 	unique_gid_calculation << <grid, block >> > (d_data);
 }
 
+__global__ void unique_gid_calculation_2d(int* input) {
+	int tid = threadIdx.x;
+	int block_offset = blockIdx.x * blockDim.x;
+	int row_offset = gridDim.x * blockDim.x * blockIdx.y;
+	int gid = row_offset + block_offset + tid;
+	printf("blockIdx.x=%d, threadIdx.x=%d, gid=%d, value=%d\n", 
+		blockIdx.x, threadIdx.x, gid, input[gid]);
+}
+
+void sample3() {
+	int h_data[] = { 23, 9, 4, 53, 65, 12, 1, 33, 22, 43, 56, 4, 76, 81, 94, 32 };
+	print(h_data, sizeof(h_data));
+	int* d_data;
+	createCudaData(h_data, sizeof(h_data), &d_data);
+	dim3 block(4);
+	dim3 grid(2, 2);
+	unique_gid_calculation_2d << <grid, block >> > (d_data);
+}
+
 int main() {
 	//sample1();
-	sample2();
+	//sample2();
+	sample3();
 
 	cudaDeviceSynchronize();
 	cudaDeviceReset();

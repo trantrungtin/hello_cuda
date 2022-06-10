@@ -56,3 +56,20 @@ Calculate the unique index
 gid = tid + offset
 grid = tid + blockIdx.x * blockDim.x
 ```
+
+### Calculate 2D indexes
+
+<p align="center">
+    <img src="images/pic7.png" alt="gid" width="50%">
+</p>
+
+<p align="center">
+    <img src="images/pic8.png" alt="gid" width="50%">
+</p>
+
+```c++
+int tid = threadIdx.x;
+int block_offset = blockIdx.x * blockDim.x;
+int row_offset = gridDim.x * blockDim.x * blockIdx.y;
+int gid = row_offset + block_offset + tid;
+```
