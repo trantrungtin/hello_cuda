@@ -60,10 +60,6 @@ grid = tid + blockIdx.x * blockDim.x
 ### Calculate 2D indexes
 
 <p align="center">
-    <img src="images/pic7.png" alt="gid" width="50%">
-</p>
-
-<p align="center">
     <img src="images/pic8.png" alt="gid" width="50%">
 </p>
 
@@ -71,5 +67,32 @@ grid = tid + blockIdx.x * blockDim.x
 int tid = threadIdx.x;
 int block_offset = blockIdx.x * blockDim.x;
 int row_offset = gridDim.x * blockDim.x * blockIdx.y;
+int gid = row_offset + block_offset + tid;
+```
+
+### Calculate 2Dx2D indexes
+<p align="center">
+    <img src="images/pic10.png" alt="gid" width="50%">
+</p>
+
+***Block offset***
+```c++
+int number_threads_in_a_block = blockDim.x * blockDim.y;
+int block_offset = number_threads_in_a_block * blockIdx.x;
+```
+
+***Row offset***
+```c++
+int number_threads_in_a_row = number_threads_in_a_block * gridDim.x;
+int row_offset = number_threads_in_a_row * blockIdx.y;
+```
+
+***Tid***
+<p align="center">
+    <img src="images/pic9.png" alt="gid" width="40%">
+</p>
+
+```c++
+int tid = threadIdx.y * blockDim.x + threadIdx.x;
 int gid = row_offset + block_offset + tid;
 ```

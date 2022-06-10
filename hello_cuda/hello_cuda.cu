@@ -77,10 +77,32 @@ void sample3() {
 	unique_gid_calculation_2d << <grid, block >> > (d_data);
 }
 
+__global__ void unique_gid_calculation_2d_2d(int* input) {
+	int tid = threadIdx.y * blockDim.x + threadIdx.x;
+	int block_offset = (blockDim.x * blockDim.y) * blockIdx.x;
+
+	int number_threads_in_a_row = number_threads_in_a_block * gridDim.x;
+	int row_offset = number_threads_in_a_row * blockIdx.y;
+	int gid = row_offset + block_offset + tid;
+	printf("blockIdx.x=%d, threadIdx.x=%d, gid=%d, value=%d\n",
+		blockIdx.x, threadIdx.x, gid, input[gid]);
+}
+
+void sample4() {
+	int h_data[] = { 23, 9, 4, 53, 65, 12, 1, 33, 22, 43, 56, 4, 76, 81, 94, 32 };
+	print(h_data, sizeof(h_data));
+	int* d_data;
+	createCudaData(h_data, sizeof(h_data), &d_data);
+	dim3 block(2, 2);
+	dim3 grid(2, 2);
+	unique_gid_calculation_2d_2d << <grid, block >> > (d_data);
+}
+
 int main() {
 	//sample1();
 	//sample2();
-	sample3();
+	//sample3();
+	sample4();
 
 	cudaDeviceSynchronize();
 	cudaDeviceReset();
