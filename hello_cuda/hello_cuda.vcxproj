@@ -79,6 +79,7 @@
   <ItemGroup>
     <CudaCompile Include="hello_cuda.cu" />
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="sum_three_array.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

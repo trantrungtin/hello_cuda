@@ -185,7 +185,7 @@ void sum_array_cpu(int* a, int* b, int* c, int number_of_elements) {
 	}
 }
 
-void compare_arrays(int* a, int* b, int number_of_elements) {
+void compare_arrays_(int* a, int* b, int number_of_elements) {
 	for (int i = 0; i < number_of_elements; i++) {
 		if (a[i] != b[i]) {
 			printf("Arrays are different.\n");
@@ -235,7 +235,7 @@ void sum_two_arrays() {
 	cpu_start = clock();
 	sum_array_cpu(h_a, h_b, h_c, number_of_elements);
 	cpu_end = clock();
-	compare_arrays(h_c, gpu_results, number_of_elements);
+	compare_arrays_(h_c, gpu_results, number_of_elements);
 
 	printf("Sum array CPU execution time: %4.6f\n", (double)((double)(cpu_end - cpu_start) / CLOCKS_PER_SEC));
 	printf("Sum array GPU execution time: %4.6f\n", (double)((double)(gpu_end - gpu_start) / CLOCKS_PER_SEC));
@@ -253,6 +253,7 @@ void sum_two_arrays() {
 	free(gpu_results);
 }
 
+/*
 int main() {
 	//sample1();
 	//sample2();
@@ -266,3 +267,4 @@ int main() {
 	cudaDeviceReset();
 	return 0;
 }
+*/
